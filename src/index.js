@@ -1,11 +1,10 @@
 import './global.css'
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from 'react'
+import ReactDOM from 'react-dom'
+
+import Routes from './app/routes'
 
 ReactDOM.render(
-  <div>
-    ASD
-  </div>
-  , document.getElementById('root')
-);
+  <Routes />, document.getElementById('root')
+)

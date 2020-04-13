@@ -1,0 +1,22 @@
+/***************************************************/
+/* Cores da APP */
+/***************************************************/
+.primary-color {
+    background-color: #00264e !important;
+}
+
+.primary-color-dark {
+    background-color: #001326 !important;
+}
+
+.text-color {
+    color: #beff00 !important;
+}
+
+.primary-text-color {
+    color: #00264e !important;
+}
+
+.secondary-text-color {
+    color: #ffffff !important;
+}
