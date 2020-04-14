@@ -8,18 +8,22 @@ import consts from '../consts'
 import api from '../services/api'
 
 import If from '../utils/if'
-import App from '../app/app'
 import Logon from '../pages/Logon'
+import StageOne from '../pages/StageOne'
+
+import { StateProvider as StageOneProvider } from '../pages/StageOne/store'
 
 export default props => {
 
     const [validToken, setValidToken] = useState(false)
+    const [stageId, setStageId] = useState(1)
+
 
     const token = localStorage.getItem(consts.USER_KEY)
-
     useEffect(() => {
 
         function validateToken() {
+
             api.post('cli/vtoken', { token }
             ).then(response => {
                 setValidToken(response.data.valid)
@@ -34,12 +38,23 @@ export default props => {
 
         validateToken()
 
+
     }, [token])
+
 
     return (
         <>
             <If test={validToken}>
-                <App />
+
+                <If test={stageId === 1}>
+                    <StageOneProvider>
+                        <StageOne />
+                    </StageOneProvider>
+                </If>
+
+                <If test={stageId !== 1 && stageId !== 2 && stageId !== 3 && stageId !== 4}>
+                    NOT FOUND!
+                </If>
             </If>
             <If test={!validToken}>
                 <Logon />

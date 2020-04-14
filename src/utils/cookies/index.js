@@ -2,15 +2,22 @@ import consts from '../../consts'
 import jwt_decode from 'jwt-decode'
 
 function getUserKey() {
-    //console.log('Obter Cookie')
     return localStorage.getItem(consts.USER_KEY)
 }
 
 function getUserKeyDecoded() {
-    var decoded = jwt_decode(getUserKey())
+    const token = getUserKey()
+    let decoded = ''
+    if (token)
+        decoded = jwt_decode(token)
+
     return decoded
 }
 
-export function getUserName() {
+export function getCustomerName() {
     return getUserKeyDecoded().name
+}
+
+export function getCustomerId() {
+    return getUserKeyDecoded().id
 }
