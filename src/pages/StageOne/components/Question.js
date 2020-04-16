@@ -1,16 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
+import dateExpired from '../../../utils/js/dateExpired'
 
-import { store } from '../store'
+import { store } from '../../../components/pages/store'
 
 import axios from 'axios'
 import api from '../../../services/api'
-import { update } from '../actions'
-
+import { updateResult } from '../../../components/pages/action'
 
 import Footer from '../../../components/sections/Footer'
-
-import '../styles.css'
 
 export default props => {
 
@@ -22,12 +20,14 @@ export default props => {
 
     const [questionAnsweredsIds, setQuestionsAnsweredIds] = useState([]) // para saber quantas questoes foram respondidas
     const [order, setOrder] = useState(1)
-    const [currentStageOne, setCurrentStageOne] = useState({ questions: {} })
+    const [currentStageOne, setCurrentStageOne] = useState({ question: {} })
+    const [inOutClass, setInOutClass] = useState('')
 
-    const qtyQuestions = (customerStage && customerStage.customerStageOnes) ? customerStage.customerStageOnes.length : 0
+    const qtyQuestions = customerStage.customerStageOnes.length
     const nextVisible = (currentStageOne.answer_id !== null) && qtyQuestions > order
     const previousVisible = order > 1
-
+    const dateIni = (customerStage) ? customerStage.date_ini : ''
+    const duration_min = (customerStage) ? customerStage.duration_min : 0
 
     //handle totals
     useEffect(() => {
@@ -37,103 +37,118 @@ export default props => {
             setOrder(questionsAnswered.length + 1)
         }
 
-    }, [customerStage])
+    }, [customerStage, qtyQuestions])
 
     //handle load current question on stageone
     useEffect(() => {
+        let timeOutClass = 0
         async function loadQuestion() {
             if (customerStage && customerStage.id > 0 && order > 0 && customerStage.date_end === null) {
                 const response = await api.get(`customerstageone/${customerStage.id}/${order}`, { headers: { 'Authorization': axios.defaults.headers.common['Authorization'] } })
                 if (response.data != null) {
                     setCurrentStageOne(response.data)
+                    timeOutClass = setTimeout(() => {
+                        setInOutClass('')
+                    }, 1500);
                 }
             }
         }
 
         loadQuestion()
+
+        return () => {
+            clearTimeout(timeOutClass)
+        }
     }, [customerStage, order])
 
-    async function handleCustomerResult() {
+    function handleCustomerResult() {
+        updateResult(dispatch, customerStage.id)
+    }
 
-        // tem que acertar mais de X!!!!
-
-
-
-        const data = {
-            date_end: new Date(),
-            approved: 0,
-        }
-
-        update(dispatch, customerStage.id, data)
+    function handleOnExpire() {
+        handleCustomerResult()
     }
 
     function handleNext() {
-
-        setOrder(order + 1)
-
+        setInOutClass('')
         //é o fim?
-        if (order === qtyQuestions) {
+        if (order >= qtyQuestions) {
             handleCustomerResult()
+        } else {
+            setOrder(order + 1)
+            setInOutClass('fade-in')
         }
+
     }
 
     function handlePrevious() {
-        if (order > 1)
+        setInOutClass('')
+        if (order > 1) {
+            setInOutClass('fade-in')
             setOrder(order - 1)
+
+        }
     }
 
     async function handleSelectedAnswer(customerStageOneId, question, answer) {
 
-        //valida se nao é golpe
+
+        // se ja foi atualizado envia para rota final
         if (customerStage.date_end !== null)
             history.replace('/end')
         else {
 
-            const data = {
-                answer_id: answer.id,
-                value: question.value
-            }
+            // verifica se ja expirou e chama o calculo do resultado
+            // + 1 verificacao alem do timer que ja valida, caso ocorra algum problema no caminho!
+            let seconds = dateExpired(customerStage.date_ini, duration_min)
+            if (seconds <= 0) {
+                handleCustomerResult()
+            } else {
+                // vai para a proxima pergunta
 
-            const response = await api.put(`customerstageone/${customerStageOneId}`, data, { headers: { 'Authorization': axios.defaults.headers.common['Authorization'] } })
-            if (response.data !== null) {
-                const questionAnsweredIdExists = questionAnsweredsIds.filter(id => id === question.id)
-                if (questionAnsweredIdExists.length === 0)
-                    setQuestionsAnsweredIds([...questionAnsweredsIds, question.id])
 
-                handleNext()
+                const data = {
+                    answer_id: answer.id,
+                    value: question.value
+                }
+
+                const response = await api.put(`customerstageone/${customerStageOneId}`, data, { headers: { 'Authorization': axios.defaults.headers.common['Authorization'] } })
+                if (response.data !== null) {
+                    const questionAnsweredIdExists = questionAnsweredsIds.filter(id => id === question.id)
+                    if (questionAnsweredIdExists.length === 0)
+                        setQuestionsAnsweredIds([...questionAnsweredsIds, question.id])
+
+                    handleNext()
+                }
             }
         }
     }
-
 
     return (
         <>
             <div className="content-wrapper">
                 <section className="content">
-                    <div className="content-stage">
+                    <div className={`content-stage ${inOutClass}`}>
                         <div className="m-3">
-                            <div className="stage-question">
-                                <i className="fa fa-list"></i>{' '} Pergunta {order}
-                            </div>
                             <div className="stage-question-title">
-                                {currentStageOne.questions.title}
+                                {order}) {currentStageOne.question.title}
                             </div>
-                            {currentStageOne.questions.description && (
+                            {currentStageOne.question.description && (
                                 <div className="stage-question-description">
-                                    {currentStageOne.questions.description}
+                                    {currentStageOne.question.description}
                                 </div>
                             )}
                             <div className="stage-question-resp">
-                                {currentStageOne.questions.image_url && (
+                                {currentStageOne.question.image_url && (
                                     <div className="stage-question-resp-img">
-                                        <img src={currentStageOne.questions.image_url} alt='' className='img-fluid' />
+                                        <img src={currentStageOne.question.image_url} alt='' className='img-fluid' />
                                     </div>
                                 )}
                                 <div className="stage-question-resp-answers">
                                     <ul>
-                                        {currentStageOne.questions.answers && (currentStageOne.questions.answers.map(ans => {
+                                        {currentStageOne.question.answers && (currentStageOne.question.answers.map(ans => {
                                             return (
-                                                <li key={ans.id}><button type="button" onClick={() => handleSelectedAnswer(currentStageOne.id, currentStageOne.questions, ans)} className={`btn btn-block btn-outline-secondary btn-md text-left ${(currentStageOne.answer_id === ans.id) ? 'active' : ''}`}>{ans.name}</button></li>
+                                                <li key={ans.id}><button type="button" onClick={() => handleSelectedAnswer(currentStageOne.id, currentStageOne.question, ans)} className={`btn btn-block btn-outline-secondary btn-md text-left ${(currentStageOne.answer_id === ans.id) ? 'active' : ''}`}>{ans.name}</button></li>
                                             )
                                         }))}
 
@@ -144,7 +159,17 @@ export default props => {
                     </div>
                 </section>
             </div>
-            <Footer onClickNext={handleNext} nextVisible={nextVisible} onClickPrevious={handlePrevious} previousVisible={previousVisible} qtyQuestions={qtyQuestions} qtyAnswered={questionAnsweredsIds.length} order={order} />
+            <Footer
+                onExpire={handleOnExpire}
+                dateIni={dateIni}
+                duration_min={duration_min}
+                onClickNext={handleNext}
+                nextVisible={nextVisible}
+                onClickPrevious={handlePrevious}
+                previousVisible={previousVisible}
+                qtyQuestions={qtyQuestions}
+                qtyAnswered={questionAnsweredsIds.length}
+                order={order} />
         </>
     )
 }

@@ -11,7 +11,7 @@ import If from '../utils/if'
 import Logon from '../pages/Logon'
 import StageOne from '../pages/StageOne'
 
-import { StateProvider as StageOneProvider } from '../pages/StageOne/store'
+import { StateProvider as StageOneProvider } from '../components/pages/store'
 
 export default props => {
 

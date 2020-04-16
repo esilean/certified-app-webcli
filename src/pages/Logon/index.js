@@ -22,7 +22,7 @@ export default props => {
             localStorage.setItem(consts.USER_KEY, response.data.token)
 
             toast.info(`Bem vindo ${response.data.name}!`, { autoClose: 2000 })
-            history.push('/')
+            history.replace('/')
 
         } catch (err) {
             toast.error('Usuário e/ou senha incorretos.')
@@ -36,9 +36,9 @@ export default props => {
 
     return (
         <div className="login-page">
-            <div className="login-logo">
+            {/* <div className="login-logo">
                 Certificado<b> O CORPO EXPLICA</b>
-            </div>
+            </div> */}
             <div className="container">
                 <div className="justify-content-center row">
                     <div className="col-md-8">
@@ -46,7 +46,7 @@ export default props => {
 
                             <div className="primary-color py-5 d-md-down-none card">
                                 <div className="text-center card-body">
-                                    <img src={logoImg} alt="Logo" height="150" />
+                                    <img src={logoImg} alt="Logo" height="150" className="img-fluid" />
                                 </div>
                             </div>
 

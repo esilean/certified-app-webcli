@@ -35,3 +35,8 @@
 .content-footer-progress {
     width: 15%;
 }
+
+.header-button-signout{
+    position: absolute;
+    right: 40px;
+}

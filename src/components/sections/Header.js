@@ -1,8 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { } from 'react'
 import { useHistory } from 'react-router-dom'
-
-import api from '../../services/api'
-import axios from 'axios'
 
 import consts from '../../consts'
 
@@ -10,29 +7,13 @@ import logo from '../../assets/brand/logo.png'
 import './styles.css'
 
 
-export default props => {
+export default ({ customerStage }) => {
 
     const history = useHistory()
 
-    const [title, setTitle] = useState('')
-
-    useEffect(() => {
-        async function loadStage() {
-            try {
-
-                const response = await api.get(`stages/${props.stageId}`, { headers: { 'Authorization': axios.defaults.headers.common['Authorization'] } })
-                setTitle(response.data.name)
-
-            } catch (error) {
-            }
-        }
-
-        loadStage()
-    }, [props.stageId])
-
     function signOut() {
         localStorage.removeItem(consts.USER_KEY)
-        history.push('/')
+        history.replace('/')
     }
 
     return (
@@ -40,10 +21,15 @@ export default props => {
             <div className="content-header">
                 <div>
                     <img src={logo} alt="O Corpo Explica" height='100' />
-                    <button type="button" onClick={() => signOut()}>SAIR</button>
                 </div>
                 <div className="content-header-title">
-                    <h4>{title}</h4>
+                    <h4>{customerStage.stage.name}</h4>
+                </div>
+                <div className="header-button-signout">
+                    <a className="nav-link" title='Sair do Sistema' href="/#/" onClick={e => signOut()} role="button">
+                        <i className="fa fa-sign-out"></i>
+                    </a>
+
                 </div>
             </div>
         </header>

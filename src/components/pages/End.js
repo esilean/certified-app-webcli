@@ -5,8 +5,12 @@ import './styles.css'
 export default props => {
 
     return (
-        <div className="container-page">
-            PAGINA FINAL
+        <div className="content-wrapper">
+            <section className="content">
+                <div className="content-stage">
+                   FINAL
+                </div>
+            </section>
         </div>
     )
 }
