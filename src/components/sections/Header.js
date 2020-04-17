@@ -20,10 +20,10 @@ export default ({ customerStage }) => {
         <header className="navbar fixed-top shadow-lg p-3 primary-color">
             <div className="content-header">
                 <div>
-                    <img src={logo} alt="O Corpo Explica" height='100' />
+                    <img src={logo} alt="O Corpo Explica" className="img-fluid logo-img" />
                 </div>
                 <div className="content-header-title">
-                    <h4>{customerStage.stage.name}</h4>
+                    <h5>{customerStage.stage.name}</h5>
                 </div>
                 <div className="header-button-signout">
                     <a className="nav-link" title='Sair do Sistema' href="/#/" onClick={e => signOut()} role="button">

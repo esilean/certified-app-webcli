@@ -21,7 +21,7 @@ export default props => {
             const response = await api.post('cli/login', values)
             localStorage.setItem(consts.USER_KEY, response.data.token)
 
-            toast.info(`Bem vindo ${response.data.name}!`, { autoClose: 2000 })
+            //toast.info(`Bem vindo ${response.data.name}!`, { autoClose: 2000 })
             history.replace('/')
 
         } catch (err) {
@@ -36,9 +36,6 @@ export default props => {
 
     return (
         <div className="login-page">
-            {/* <div className="login-logo">
-                Certificado<b> O CORPO EXPLICA</b>
-            </div> */}
             <div className="container">
                 <div className="justify-content-center row">
                     <div className="col-md-8">

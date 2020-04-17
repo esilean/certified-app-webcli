@@ -1,34 +1,18 @@
 import toast from '../../../components/toastr'
 
-import axios from 'axios'
 import api from '../../../services/api'
+import { getToken } from '../../../utils/cookies'
 
-export function load(dispatch, customerId, stageId) {
+export function load(dispatch, customerId) {
 
-    api.get(`customerstage/${customerId}/${stageId}`, { headers: { 'Authorization': axios.defaults.headers.common['Authorization'] } }
+    api.get(`customerstage/${customerId}/current`, { headers: { 'Authorization': getToken() } }
     ).then(response => {
 
         let payload = response.data
 
-        // se ainda nao cadastrou, cadastra a etapa inicial
+        // se ainda nao cadastrou, cadastra a etapa inicial 1
         if (payload == null) {
-            api.get('stages/1', { headers: { 'Authorization': axios.defaults.headers.common['Authorization'] } }
-            ).then(response => {
-
-                if (response.data) {
-                    const { questions_qty, duration_min, grade_perc_min } = response.data
-                    const data = {
-                        questions_qty,
-                        duration_min,
-                        grade_perc_min,
-                    }
-
-                    begin(dispatch, customerId, stageId, data)
-                }
-
-            }).catch(err => {
-                toast.error("Erro ao obter dados da primeira etapa.")
-            })
+            begin(dispatch, customerId, 1)
         } else {
             dispatch({ type: 'STAGE_LOADED', payload })
         }
@@ -39,7 +23,7 @@ export function load(dispatch, customerId, stageId) {
 
 export function update(dispatch, customerStageId, data) {
 
-    api.put(`customerstage/${customerStageId}`, data, { headers: { 'Authorization': axios.defaults.headers.common['Authorization'] } }
+    api.put(`customerstage/${customerStageId}`, data, { headers: { 'Authorization': getToken() } }
     ).then(response => {
         dispatch({ type: 'STAGE_LOADED', payload: response.data })
     }).catch(err => {
@@ -49,7 +33,7 @@ export function update(dispatch, customerStageId, data) {
 
 export function updateResult(dispatch, customerStageId) {
 
-    api.get(`customerstage/${customerStageId}/result`, { headers: { 'Authorization': axios.defaults.headers.common['Authorization'] } }
+    api.get(`customerstage/${customerStageId}/result`, { headers: { 'Authorization': getToken() } }
     ).then(response => {
 
         const data = {
@@ -65,12 +49,33 @@ export function updateResult(dispatch, customerStageId) {
     })
 }
 
-function begin(dispatch, customerId, stageId, data) {
+export function begin(dispatch, customerId, stageId) {
 
-    api.post(`customerstage/${customerId}/${stageId}`, data, { headers: { 'Authorization': axios.defaults.headers.common['Authorization'] } }
+    api.get(`stages/${stageId}`, { headers: { 'Authorization': getToken() } }
     ).then(response => {
-        dispatch({ type: 'STAGE_LOADED', payload: response.data })
+
+        if (response.data) {
+            const { questions_qty, duration_min, grade_perc_min } = response.data
+            const data = {
+                questions_qty,
+                duration_min,
+                grade_perc_min,
+            }
+
+            api.post(`customerstage/${customerId}/${stageId}`, data, { headers: { 'Authorization': getToken() } }
+            ).then(response => {
+                dispatch({ type: 'STAGE_LOADED', payload: response.data })
+            }).catch(err => {
+                toast.error("Erro ao gerar etapa.")
+            })
+        }
+
     }).catch(err => {
-        toast.error("Erro ao gerar etapa.")
+        toast.error("Erro ao obter dados da primeira etapa.")
     })
+
+
+
+
+
 }

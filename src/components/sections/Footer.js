@@ -37,7 +37,7 @@ export default ({ onExpire, dateIni, duration_min, onClickNext, nextVisible, onC
 
     return (
 
-        <footer className="navbar fixed-bottom shadow-lg p-3 primary-color" style={{ minHeight: '110px' }}>
+        <footer className="fixed-bottom shadow-lg p-3 primary-color" style={{ minHeight: '110px' }}>
             <div className="content-footer">
                 <div className="content-footer-button">
                     {previousVisible && (<button onClick={() => handlePrevious()} className="footer-button"> <GoArrowLeft />{' '}anterior</button>)}

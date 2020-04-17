@@ -1,12 +1,12 @@
 import consts from '../../consts'
 import jwt_decode from 'jwt-decode'
 
-function getUserKey() {
+export function getToken() {
     return localStorage.getItem(consts.USER_KEY)
 }
 
-function getUserKeyDecoded() {
-    const token = getUserKey()
+function getTokenDecoded() {
+    const token = getToken()
     let decoded = ''
     if (token)
         decoded = jwt_decode(token)
@@ -15,9 +15,9 @@ function getUserKeyDecoded() {
 }
 
 export function getCustomerName() {
-    return getUserKeyDecoded().name
+    return getTokenDecoded().name
 }
 
 export function getCustomerId() {
-    return getUserKeyDecoded().id
+    return getTokenDecoded().id
 }
